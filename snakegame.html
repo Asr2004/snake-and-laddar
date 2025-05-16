@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    .container {
+      display: grid;
+      grid-template-columns: repeat(10, 50px);
+      grid-template-rows: repeat(10, 50px);
+      background: url('/asserts/th.jpeg');
+      background-size: 500px 500px;
+      background-repeat: no-repeat;
+    }
+    .container div {
+      border: 1px solid black;
+      text-align: center;
+      position: relative;
+    }
+    .player-circle {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      position: absolute;
+    }
+    .player1 {
+      background-color: red;
+      top: 5px;
+      left: 5px;
+    }
+    .player2 {
+      background-color: blue;
+      bottom: 5px;
+      right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="board"></div>
+
+  <button onclick="rol()">Dice</button>
+  <div><img src="" alt="" class="img1" /></div>
+
+  <script>
+    const board = document.getElementById('board');
+    for (let row = 9; row >= 0; row--) {
+      for (let col = 0; col < 10; col++) {
+        let number = row * 10 + (row % 2 === 0 ? col + 1 : 10 - col);
+        const tile = document.createElement('div');
+        tile.className = `title${number}`;
+        tile.textContent = number;
+        board.appendChild(tile);
+      }
+    }
+
+    function win() {
+      new Audio('/asserts/game-bonus-144751.mp3').play();
+    }
+
+    function loss() {
+      new Audio('/asserts/080205_life-lost-game-over-89697.mp3').play();
+    }
+
+    function diceSound() {
+      new Audio('/asserts/diceland-90279.mp3').play();
+    }
+
+    let count1 = 0;
+    let count2 = 0;
+    let turn = 1;
+
+    const snakesLadders = {
+      4: 25, 13: 46, 27: 5, 33: 49, 40: 3, 42: 63,
+      43: 18, 50: 69, 54: 31, 62: 81, 66: 45,
+      74: 92, 76: 58, 89: 53, 99: 41
+    };
+
+    function createCircle(playerClass) {
+      const circle = document.createElement('div');
+      circle.classList.add('player-circle', playerClass);
+      return circle;
+    }
+
+    function removePrevious(playerClass) {
+      const old = document.querySelector(`.${playerClass}`);
+      if (old && old.parentNode) old.parentNode.removeChild(old);
+    }
+
+    function rol() {
+      diceSound();
+      const random = 1 + Math.floor(Math.random() * 6);
+      document.querySelector('.img1').src = `/asserts/D-${random}.png`;
+
+      if (turn === 1) {
+        removePrevious('player1');
+        if (count1 + random <= 100) count1 += random;
+
+        if (snakesLadders[count1]) {
+          if (snakesLadders[count1] > count1) win(); else loss();
+          count1 = snakesLadders[count1];
+        }
+
+        const tile = document.querySelector(`.title${count1}`);
+        if (tile) tile.appendChild(createCircle('player1'));
+        turn = 2;
+
+      } else {
+        removePrevious('player2');
+        if (count2 + random <= 100) count2 += random;
+
+        if (snakesLadders[count2]) {
+          if (snakesLadders[count2] > count2) win(); else loss();
+          count2 = snakesLadders[count2];
+        }
+
+        const tile = document.querySelector(`.title${count2}`);
+        if (tile) tile.appendChild(createCircle('player2'));
+        turn = 1;
+      }
+    }
+  </script>
+</body>
+</html>
